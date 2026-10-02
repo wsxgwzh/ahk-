@@ -1,35 +1,46 @@
 ﻿#Requires AutoHotkey v2.0
 
 ; ======== 第一步：自定义截图区域 ========
-; 已替换为你提供的坐标
 CaptureX := 158    ; 左上角 X 坐标
 CaptureY := 432    ; 左上角 Y 坐标
 CaptureW := 965    ; 截图宽度
 CaptureH := 583    ; 截图高度
 ; ====================================
 
-; 按【鼠标左侧下侧键】执行全自动流程
+; ======== 鼠标下侧键 (XButton1) ========
 XButton1:: {
-    ; 1. 先点击你指定的位置 (838, 1205)
     Click 838, 1205
     Sleep 300   ; 等待点击生效
-    
-    ; 2. 自动截取指定区域并复制到剪贴板
-    CaptureAndCopy(CaptureX, CaptureY, CaptureW, CaptureH)
-    
-    ; 3. 自动点击右侧输入框（如果输入框位置变了，记得修改下面这行坐标）
-    Click 1508, 1310
-    
-    ; 4. 粘贴图片
-    Sleep 300   ; 等待光标激活
-    Send "^v"
-    
-    ; 5. 发送
-    Sleep 600  ; 等待上传（图片大或网速慢就改成 2000 或 3000）
-    Send "{Enter}"
+    ProcessQuestion()
 }
 
-; ======== 截图并复制到剪贴板的函数（不需要改动） ========
+; ======== 鼠标上侧键 (XButton2) ========
+XButton2:: {
+    ProcessQuestion()
+}
+
+; ======== 公共流程函数 ========
+ProcessQuestion() {
+    ; 1. 截图并复制
+    CaptureAndCopy(CaptureX, CaptureY, CaptureW, CaptureH)
+    
+    ; 2. 点击右侧输入框
+    Click 1508, 1310
+    
+    ; 3. 粘贴图片
+    Sleep 300
+    Send "^v"
+    
+    ; 4. 发送
+    Sleep 600  ; 等待上传
+    Send "{Enter}"
+    
+    ; 5. 把鼠标移到 314, 593（不点击）
+    Sleep 500
+    MouseMove 314, 593
+}
+
+; ======== 截图并复制到剪贴板的函数（千万别漏掉这一段！）========
 CaptureAndCopy(x, y, w, h) {
     psCode := "Add-Type -AssemblyName System.Windows.Forms,System.Drawing; "
            . "$bmp = New-Object Drawing.Bitmap " w ", " h "; "
@@ -44,6 +55,5 @@ CaptureAndCopy(x, y, w, h) {
         
     FileAppend(psCode, tempFile)
     
-    ; 强制隐藏 PowerShell 黑框
     RunWait("powershell.exe -NoProfile -ExecutionPolicy Bypass -File `"" tempFile "`"", , "Hide")
 }
